@@ -1,0 +1,37 @@
+{
+  "name": "allowance",
+  "version": "1.0.0",
+  "description": "Provable spending mandates for AI agents on Mina: a recursive proof that a day of agent spends stayed inside a hidden policy.",
+  "main": "build/src/index.js",
+  "scripts": {
+    "test": "npm run build && node --test --test-concurrency=1 'build/test/*.test.js'",
+    "build": "rm -rf build && tsc -p .",
+    "test:proofs": "npm run build && REAL_PROOFS=1 node --test --test-concurrency=1 --test-timeout=3600000 'build/test/*.test.js'",
+    "demo": "npm run build && node build/src/demo.js"
+  },
+  "keywords": [
+    "mina",
+    "o1js",
+    "zkapp",
+    "zk-snark",
+    "recursion",
+    "ai-agents"
+  ],
+  "author": "OoJae",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "o1js": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22.19.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OoJae/allowance"
+  }
+}
