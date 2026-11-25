@@ -78,6 +78,32 @@ Demo output on an Apple-silicon laptop:
    receipts chain over 3 records matches on-chain state: complete and untampered
 ```
 
+## Deploy to a live network
+
+[`src/deploy.ts`](src/deploy.ts) deploys the contract, opens the agent's account, proves a real spend log against the live global slot, settles it, and records the transaction hashes in `deployments/<network>.json`. Keys and the private policy salt are written to `keys/` (gitignored), so re-runs reuse the same contract.
+
+```sh
+npx zkapp-cli lightnet start --mina-branch mesa   # local Mina network in Docker
+NETWORK=lightnet npm run deploy
+
+NETWORK=devnet npm run deploy   # first run prints a faucet link for the owner account
+```
+
+Lightnet run (Mesa branch, single node):
+
+```
+compile: 18.4s
+deploying: deploy + initialize + fund budget + open agent account
+  included
+slot 12, period 0: proving a spend log
+  prove spend 0.6 MINA: 5.7s
+  prove spend 0.4 MINA: 5.6s
+settling 5Juxuw5eD5bgxUKafikvqQxnintdnZXbcDeqMCba1crskzJ7iYkP
+  included: agent reimbursed 1 MINA
+  on-chain spent 1 MINA in period 0
+  receipts match the agent's records
+```
+
 ## Tests
 
 [`test/allowance.test.ts`](test/allowance.test.ts) covers the happy path and every way to cheat that the design rules out. Each rejection is pinned to its specific error, not just "it threw":
@@ -105,6 +131,7 @@ Demo output on an Apple-silicon laptop:
 | [`src/allowance.ts`](src/allowance.ts) | `Allowance`, the contract (`initialize`, `setMandate`, `withdraw`, `settle`) |
 | [`src/session.ts`](src/session.ts) | Agent-side `SpendSession`, `ledgerFor`, and the owner's `auditReceipts` |
 | [`src/demo.ts`](src/demo.ts) | The end-to-end run above |
+| [`src/deploy.ts`](src/deploy.ts) | Deploy, prove and settle on Lightnet or devnet |
 
 ## Design notes
 
@@ -116,7 +143,7 @@ Demo output on an Apple-silicon laptop:
 
 ## Limits and next steps
 
-- Only tested on `Mina.LocalBlockchain`. Next: deploy to devnet and add a script that reads state with `fetchAccount`.
+- Runs end to end on Lightnet (a real Mina node). The devnet deployment is next; the devnet endpoints were down while this was written.
 - Proving takes about 5 s per spend on a laptop. That's fine for logging spends in the background, but too slow to sit on every HTTP request.
 - The day's total and the agent's address are public. Payees, amounts and the policy are not.
 - Spends are proven sequentially. A tree of merged sub-logs (two-proof `merge`) would allow proving in parallel.

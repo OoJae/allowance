@@ -7,7 +7,8 @@
     "test": "npm run build && node --test --test-concurrency=1 'build/test/*.test.js'",
     "build": "rm -rf build && tsc -p .",
     "test:proofs": "npm run build && REAL_PROOFS=1 node --test --test-concurrency=1 --test-timeout=3600000 'build/test/*.test.js'",
-    "demo": "npm run build && node build/src/demo.js"
+    "demo": "npm run build && node build/src/demo.js",
+    "deploy": "npm run build && node build/src/deploy.js"
   },
   "keywords": [
     "mina",
