@@ -139,7 +139,7 @@ settling 5Juxuw5eD5bgxUKafikvqQxnintdnZXbcDeqMCba1crskzJ7iYkP
 - **State fits in 8 fields** (`owner`, `agent`, `policyHash`, `period`, `spent`, `receipts`): the pre-Mesa limit. Mesa's 32 leaves room for per-payee caps or a second agent.
 - **Code and permissions are locked at deploy** (`setVerificationKey: impossibleDuringCurrentVersion`, `setPermissions: impossible`). An agent fronting its own money for reimbursement needs to know these rules can't change under it.
 - **`initialize` must be in the deploy transaction.** It is guarded by `provedState` as the o1js docs recommend, and it requires the owner's signature.
-- **Periods are 480 slots** (24 hours at 180 s per slot) and are derived from the global slot, not from the agent's clock.
+- **Periods are 960 slots** (24 hours at Mesa's 90 s slots) and are derived from the global slot, not from the agent's clock.
 
 ## Limits and next steps
 

@@ -27,8 +27,9 @@ import { SpendSession, auditReceipts, ledgerFor } from './session.js';
 const NETWORK = (process.env.NETWORK ?? 'devnet') as 'devnet' | 'lightnet';
 const NETWORKS = {
   devnet: {
-    mina: process.env.MINA_GRAPHQL ?? 'https://api.minascan.io/node/devnet/v1/graphql',
-    explorer: 'https://minascan.io/devnet',
+    // o1Labs' devnet node, as recommended in the Mina docs.
+    mina: process.env.MINA_GRAPHQL ?? 'https://devnet-plain-1.gcp.o1test.net/graphql',
+    explorer: undefined,
   },
   lightnet: {
     mina: process.env.MINA_GRAPHQL ?? 'http://127.0.0.1:8080/graphql',
@@ -42,7 +43,7 @@ if (!config) throw new Error(`unknown NETWORK ${NETWORK}`);
 const FEE = 100_000_000; // 0.1 MINA
 const BUDGET = 3;
 const mina = (n: number) => UInt64.from(BigInt(Math.round(n * 1e9)));
-const WAIT = { maxAttempts: 90, interval: 20_000 }; // up to 30 min; devnet blocks are ~3 min
+const WAIT = { maxAttempts: 90, interval: 20_000 }; // up to 30 min; devnet slots are 90 s
 
 type Keys = { owner: string; zkApp: string; agent: string; payees: string[]; salt: string };
 

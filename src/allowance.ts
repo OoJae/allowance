@@ -14,8 +14,8 @@ import {
 } from 'o1js';
 import { SpendLogProof } from './spend-log.js';
 
-/** 480 slots of 180 s each is 24 hours. */
-export const SLOTS_PER_PERIOD = 480;
+/** 960 slots of 90 s each (Mesa slot time) is 24 hours. */
+export const SLOTS_PER_PERIOD = 960;
 
 export function periodOfSlot(slot: number | bigint): UInt32 {
   return UInt32.from(BigInt(slot) / BigInt(SLOTS_PER_PERIOD));
