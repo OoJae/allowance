@@ -1,0 +1,17 @@
+{
+  "network": "devnet",
+  "endpoint": "https://devnet-plain-1.gcp.o1test.net/graphql",
+  "zkApp": "B62qjxBoeNUWAsHWUMZE69E8R4UmdbYTcHyz3hqBp7c2RRhZGXVWPx8",
+  "owner": "B62qn6Z2pfwbnSrVr7JGt5GNHB8d7o9CDzU1G8aeF4QNRKrwjSGfMJC",
+  "agent": "B62qpJLxdzwKFJjMnVrkswVHGosmzTpLQBM6FSrX35JvBHvuF1PodKw",
+  "policyHash": "11483575386367154554067137413890825023201852204828828297645122187019278466480",
+  "deployTx": "5JtsSZtLEPasyBUZXQYrzSEjpDSJeJ57g2uMqPnXB6Lt7yDRYKEM",
+  "settleTx": "5JuNCKZ7tBYWKXfpp1ctXwpi9Mdfdm1C6HsXHA4HawpyumTCTzHG",
+  "settlements": [
+    {
+      "tx": "5JuNCKZ7tBYWKXfpp1ctXwpi9Mdfdm1C6HsXHA4HawpyumTCTzHG",
+      "period": "993",
+      "paid": "1000000000"
+    }
+  ]
+}

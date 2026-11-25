@@ -240,6 +240,22 @@ describe('Allowance', () => {
     assert.equal(Mina.getBalance(zkApp.address).toBigInt(), mina(6).toBigInt());
   });
 
+  it('cannot be initialized a second time to take over ownership', async () => {
+    const mandate = newMandate();
+    const zkApp = await deploy(mandate, 10);
+    assert.equal(Mina.getAccount(zkApp.address).zkapp?.provedState.toBoolean(), true);
+
+    const hijack = new Mandate({ agent: intruder, payees: [intruder], perSpendCap: mina(10), periodCap: mina(10) });
+    await assert.rejects(async () => {
+      const takeover = await Mina.transaction(intruder, async () => {
+        await zkApp.initialize(intruder, intruder, hijack.hash);
+      });
+      await takeover.prove();
+      await takeover.sign([intruder.key]).send().wait();
+    }, /already initialized/);
+    assert.equal(zkApp.owner.get().toBase58(), owner.toBase58());
+  });
+
   it('maps slots to 24-hour periods', () => {
     assert.equal(periodOfSlot(0).toBigint(), 0n);
     assert.equal(periodOfSlot(SLOTS_PER_PERIOD - 1).toBigint(), 0n);

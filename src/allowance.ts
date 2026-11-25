@@ -72,6 +72,10 @@ export class Allowance extends SmartContract {
   /** Call in the same transaction as `deploy`, or anyone could claim ownership first. */
   @method async initialize(owner: PublicKey, agent: PublicKey, policyHash: Field) {
     this.account.provedState.getAndRequireEquals().assertFalse('already initialized');
+    // provedState only turns true once a proof has written *every* state
+    // field. Setting just our 8 would leave it false, and anyone could call
+    // initialize again to take ownership. super.init() writes all of them.
+    super.init();
     AccountUpdate.createSigned(owner);
     this.owner.set(owner);
     this.writeMandate(agent, policyHash);

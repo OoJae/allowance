@@ -2,7 +2,7 @@
 
 **Provable spending mandates for AI agents on Mina.** An owner gives an agent a budget under a private policy. The agent folds every payment it makes into one recursive zk proof. Anyone can settle that proof on-chain, and the contract reimburses the agent only if every spend followed the policy.
 
-Built with [o1js](https://github.com/o1-labs/o1js) 3.1. Tested on a local Mina ledger with real recursive proofs.
+Built with [o1js](https://github.com/o1-labs/o1js) 3.1. **Live on Mina devnet** at [`B62qjxBo…GVWPx8`](https://o1-labs.github.io/mina-explorer/#/account/B62qjxBoeNUWAsHWUMZE69E8R4UmdbYTcHyz3hqBp7c2RRhZGXVWPx8?network=devnet), where it has settled a real recursive proof.
 
 ```
 owner ── initialize(owner, agent, hash(policy)) ──►  Allowance contract (holds the budget)
@@ -47,8 +47,8 @@ Requires Node.js 22.19.5 or newer.
 
 ```sh
 npm install
-npm test             # 13 logic tests, about 6s (no proofs; circuit assertions and ledger rules still run)
-npm run test:proofs  # the same 13 tests with real recursive proofs, about 3.5 min
+npm test             # 14 logic tests, about 6s (no proofs; circuit assertions and ledger rules still run)
+npm run test:proofs  # the same 14 tests with real recursive proofs, 4 to 12 min on a laptop
 npm run demo         # end-to-end run with real proofs
 ```
 
@@ -77,6 +77,16 @@ Demo output on an Apple-silicon laptop:
 6. Owner audits the agent's spend records against the chain
    receipts chain over 3 records matches on-chain state: complete and untampered
 ```
+
+## Live on devnet
+
+| | |
+| --- | --- |
+| Contract | [`B62qjxBoeNUWAsHWUMZE69E8R4UmdbYTcHyz3hqBp7c2RRhZGXVWPx8`](https://o1-labs.github.io/mina-explorer/#/account/B62qjxBoeNUWAsHWUMZE69E8R4UmdbYTcHyz3hqBp7c2RRhZGXVWPx8?network=devnet) |
+| Deploy + initialize + fund | [`5JtsSZtL…YKEM`](https://o1-labs.github.io/mina-explorer/#/tx/5JtsSZtLEPasyBUZXQYrzSEjpDSJeJ57g2uMqPnXB6Lt7yDRYKEM?network=devnet) |
+| Settle (one proof, two spends) | [`5JuNCKZ7…TCTzHG`](https://o1-labs.github.io/mina-explorer/#/tx/5JuNCKZ7tBYWKXfpp1ctXwpi9Mdfdm1C6HsXHA4HawpyumTCTzHG?network=devnet) |
+
+On-chain after settling: `period` 993, `spent` 1 MINA, `provedState` true, the verification key and permissions locked, and a `settled` event carrying the new receipts hash. The full record is in [`deployments/devnet.json`](deployments/devnet.json).
 
 ## Deploy to a live network
 
@@ -121,6 +131,7 @@ settling 5Juxuw5eD5bgxUKafikvqQxnintdnZXbcDeqMCba1crskzJ7iYkP
 | reopen yesterday after today settled | contract: `period is already closed` |
 | settle tomorrow's budget today | `currentSlot` precondition (and the same proof settles once tomorrow starts) |
 | a stranger rotates the mandate or withdraws | missing owner signature |
+| a stranger calls `initialize` again to become the owner | `provedState` guard: `already initialized` |
 
 ## Layout
 
@@ -138,12 +149,12 @@ settling 5Juxuw5eD5bgxUKafikvqQxnintdnZXbcDeqMCba1crskzJ7iYkP
 - **The signature covers the running `receipts` hash**, not a counter. That pins each signed spend to one position in one log under one policy, so it can't be replayed, and the contract needs no separate nonce.
 - **State fits in 8 fields** (`owner`, `agent`, `policyHash`, `period`, `spent`, `receipts`): the pre-Mesa limit. Mesa's 32 leaves room for per-payee caps or a second agent.
 - **Code and permissions are locked at deploy** (`setVerificationKey: impossibleDuringCurrentVersion`, `setPermissions: impossible`). An agent fronting its own money for reimbursement needs to know these rules can't change under it.
-- **`initialize` must be in the deploy transaction.** It is guarded by `provedState` as the o1js docs recommend, and it requires the owner's signature.
+- **`initialize` must be in the deploy transaction, and it calls `super.init()`.** `provedState` only turns true once a proof has written *every* state field (32 under Mesa). A `provedState.assertFalse()` guard alone, as in the o1js `init()` doc example, leaves it false when the method sets only a few fields, so anyone could call `initialize` again and take ownership. My first devnet deployment had exactly that bug; `super.init()` writes all 32 fields in the same proof, and a test now pins it.
 - **Periods are 960 slots** (24 hours at Mesa's 90 s slots) and are derived from the global slot, not from the agent's clock.
 
 ## Limits and next steps
 
-- Runs end to end on Lightnet (a real Mina node). The devnet deployment is next; the devnet endpoints were down while this was written.
+- Runs end to end on devnet and Lightnet. Devnet only: the policy is real but the payees are random test keys.
 - Proving takes about 5 s per spend on a laptop. That's fine for logging spends in the background, but too slow to sit on every HTTP request.
 - The day's total and the agent's address are public. Payees, amounts and the policy are not.
 - Spends are proven sequentially. A tree of merged sub-logs (two-proof `merge`) would allow proving in parallel.

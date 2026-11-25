@@ -29,7 +29,7 @@ const NETWORKS = {
   devnet: {
     // o1Labs' devnet node, as recommended in the Mina docs.
     mina: process.env.MINA_GRAPHQL ?? 'https://devnet-plain-1.gcp.o1test.net/graphql',
-    explorer: undefined,
+    explorer: 'https://o1-labs.github.io/mina-explorer/#',
   },
   lightnet: {
     mina: process.env.MINA_GRAPHQL ?? 'http://127.0.0.1:8080/graphql',
@@ -68,7 +68,7 @@ async function loadKeys(): Promise<Keys> {
 }
 
 function link(kind: 'account' | 'tx', id: string) {
-  return config.explorer ? `${config.explorer}/${kind}/${id}` : id;
+  return config.explorer ? `${config.explorer}/${kind}/${id}?network=${NETWORK}` : id;
 }
 
 Mina.setActiveInstance(
